@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign up</title>
+  </head>
+  <body>
+    <h1>Sign up form</h1>
+    <form
+      action="/signup"
+      method="post"
+      style="
+        display: flex;
+        flex-direction: column;
+        width: fit-content;
+        gap: 10px;
+      "
+    >
+      <label for="firstname">First name</label>
+      <input type="text" name="firstname" id="firstname" />
+
+      <label for="lastname">Last name</label>
+      <input type="text" name="lastname" id="lastname" />
+
+      <label for="email">Email</label>
+      <input type="email" name="email" id="email" />
+
+      <div style="display: flex">
+        <label for="sub">Subscriber</label>
+        <input type="radio" name="sub" id="sub" checked />
+        <label for="none">Non-subscriber</label>
+        <input type="radio" name="none" id="none" />
+      </div>
+
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" />
+
+      <label for="confirm_password">Confirm your password</label>
+      <input type="password" name="confirm_password" id="confirm_password" />
+
+      <button style="background-color: aqua">Sign up!</button>
+    </form>
+  </body>
+</html>
