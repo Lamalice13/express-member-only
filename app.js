@@ -3,7 +3,8 @@ const path = require("node:path");
 const app = express();
 const expressSession = require("express-session");
 const pgSession = require("connect-pg-simple")(expressSession);
-const formValidations = require("./middlewares/formValidation");
+const signUpValidations = require("./middlewares/signUpValidations");
+const signInValidations = require("./middlewares/signInValidations");
 const { validationResult, matchedData } = require("express-validator");
 const pool = require("./db/pool");
 const passport = require("passport");
@@ -51,12 +52,16 @@ app.use((req, res, next) => {
 });
 
 // ROUTES
+
+// ROUTE SIGN UP
 app
   .route("/signup")
   .get((req, res) => {
-    res.render("signup");
+    res.render("signup", {
+      message: req.flash("auth_err"),
+    });
   })
-  .post(formValidations, async (req, res, next) => {
+  .post(signUpValidations, async (req, res, next) => {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -81,7 +86,7 @@ app
 
       req.login(user, (err) => {
         // req.login() and passport.authentificate() populate also req.user like passport.session()
-        // It also populates req.session like passport.authentificate() (which call req.login() in intern)
+        // It populates req.session with the help serializeUser() like passport.authentificate() (which call req.login() in intern)
         if (err) {
           return next(err);
         }
@@ -96,6 +101,35 @@ app
 app.route("/secretaccess").get(isAuth, (req, res) => {
   res.render("secretaccess");
 });
+
+// ROUTE LOG IN
+app
+  .route("/signin")
+  .get((req, res) => {
+    if (req.isAuthenticated()) return res.redirect("/secretaccess");
+    res.render("signin");
+  })
+  .post(signInValidations, (req, res) => {
+    const errors = validationResult(req);
+
+    if (!err.isEmpty()) {
+      const formattedError = {};
+      errors.array().forEach((err) => {
+        formattedError[err.path] = err.msg;
+      });
+      return res.render("signin", {
+        errors,
+      });
+    }
+
+    passport.authenticate("local", {
+      successRedirect: "/secretaccess",
+      failureRedirect: "/signin",
+      failureFlash: "Invalid credentials.",
+    });
+  });
+
+//   ROUTE LOG OUT
 
 // PORT
 const PORT = process.env.PORT || 3000;
