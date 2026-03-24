@@ -1,4 +1,4 @@
-const { body, validationResult, matchedData } = require("express-validator");
+const { body } = require("express-validator");
 const bcrypt = require("bcryptjs");
 
 const formValidations = [
@@ -32,3 +32,5 @@ const formValidations = [
     return true;
   }),
 ];
+
+module.exports = formValidations;

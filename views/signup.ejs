@@ -17,28 +17,45 @@
         gap: 10px;
       "
     >
+      <% if (locals.errors) {%>
+      <p style="color: red"><%= errors.firstname %></p>
+      <% } %>
       <label for="firstname">First name</label>
       <input type="text" name="firstname" id="firstname" />
 
+      <% if (locals.errors) {%>
+      <p style="color: red"><%= errors.lastname %></p>
+      <% } %>
       <label for="lastname">Last name</label>
       <input type="text" name="lastname" id="lastname" />
 
+      <% if (locals.errors) {%>
+      <p style="color: red"><%= errors.email %></p>
+      <% } %>
       <label for="email">Email</label>
       <input type="email" name="email" id="email" />
 
-      <div style="display: flex">
+      <div style="display: flex; align-items: center">
+        <% if (locals.errors) {%>
+        <p style="color: red"><%= errors.status %></p>
+        <% } %>
         <label for="sub">Subscriber</label>
-        <input type="radio" name="sub" id="sub" checked />
+        <input type="radio" name="status" value="sub" id="sub" checked />
         <label for="none">Non-subscriber</label>
-        <input type="radio" name="none" id="none" />
+        <input type="radio" name="status" value="none" id="none" />
       </div>
 
+      <% if (locals.errors) {%>
+      <p style="color: red"><%= errors.password %></p>
+      <% } %>
       <label for="password">Password</label>
       <input type="password" name="password" id="password" />
 
+      <% if (locals.errors) {%>
+      <p style="color: red"><%= errors.confirm_password %></p>
+      <% } %>
       <label for="confirm_password">Confirm your password</label>
       <input type="password" name="confirm_password" id="confirm_password" />
-
       <button style="background-color: aqua">Sign up!</button>
     </form>
   </body>
