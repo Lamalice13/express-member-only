@@ -57,6 +57,7 @@ app.use((req, res, next) => {
 app
   .route("/signup")
   .get((req, res) => {
+    if (req.isAuthenticated()) return res.redirect("/secretaccess");
     res.render("signup", {
       message: req.flash("auth_err"),
     });
@@ -109,27 +110,38 @@ app
     if (req.isAuthenticated()) return res.redirect("/secretaccess");
     res.render("signin");
   })
-  .post(signInValidations, (req, res) => {
-    const errors = validationResult(req);
+  .post(
+    signInValidations,
+    (req, res, next) => {
+      const errors = validationResult(req);
 
-    if (!err.isEmpty()) {
-      const formattedError = {};
-      errors.array().forEach((err) => {
-        formattedError[err.path] = err.msg;
-      });
-      return res.render("signin", {
-        errors,
-      });
-    }
-
+      if (!errors.isEmpty()) {
+        const formattedError = {};
+        errors.array().forEach((err) => {
+          formattedError[err.path] = err.msg;
+        });
+        return res.render("signin", {
+          errors,
+        });
+      }
+      next();
+    },
     passport.authenticate("local", {
       successRedirect: "/secretaccess",
       failureRedirect: "/signin",
       failureFlash: "Invalid credentials.",
-    });
-  });
+    })
+  );
 
-//   ROUTE LOG OUT
+// ROUTE LOG OUT
+app.post("/logout", function (req, res, next) {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
 
 // PORT
 const PORT = process.env.PORT || 3000;

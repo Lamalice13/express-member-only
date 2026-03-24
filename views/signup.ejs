@@ -8,7 +8,7 @@
   <body>
     <h1>Sign up form</h1>
     <% if (locals.message) {%>
-    <p><%= message%></p>
+    <p><%= message.auth_err %></p>
     <% } %>
     <form
       action="/signup"
