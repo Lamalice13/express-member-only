@@ -1,5 +1,4 @@
 const { body } = require("express-validator");
-const bcrypt = require("bcryptjs");
 
 const formValidations = [
   body("firstname", "First name in incorrect format")
@@ -13,8 +12,6 @@ const formValidations = [
     .isLength({ min: 1, max: 10 }),
 
   body("email", "Email in incorrect format").trim().isEmail().normalizeEmail(),
-
-  body("status").isIn(["sub", "none"]),
 
   body("password")
     .matches(/[A-Z]/)

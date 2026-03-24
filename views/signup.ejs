@@ -35,16 +35,6 @@
       <label for="email">Email</label>
       <input type="email" name="email" id="email" />
 
-      <div style="display: flex; align-items: center">
-        <% if (locals.errors) {%>
-        <p style="color: red"><%= errors.status %></p>
-        <% } %>
-        <label for="sub">Subscriber</label>
-        <input type="radio" name="status" value="sub" id="sub" checked />
-        <label for="none">Non-subscriber</label>
-        <input type="radio" name="status" value="none" id="none" />
-      </div>
-
       <% if (locals.errors) {%>
       <p style="color: red"><%= errors.password %></p>
       <% } %>
