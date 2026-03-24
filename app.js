@@ -1,16 +1,54 @@
 const express = require("express");
 const path = require("node:path");
 const app = express();
+const expressSession = require("express-session");
+const pgSession = require("connect-pg-simple")(expressSession);
 const formValidations = require("./middlewares/formValidation");
 const { validationResult, matchedData } = require("express-validator");
 const pool = require("./db/pool");
+const passport = require("passport");
+const flash = require("connect-flash");
+const isAuth = require("./middlewares/auth");
+const bcrypt = require("bcryptjs");
 
 // CONFIG
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
+app.use(flash());
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+
+// CONFIG SESSION
+app.use(
+  expressSession({
+    // We are configuring the store to be the database and not the server memory.
+    store: new pgSession({
+      pool: pool,
+      createTableIfMissing: true,
+    }),
+    // saveUninitiliazed:  If req.session has not been modified by req.login() or passport.authentificate() (by adding passport obj to the req.session), the session will not be saved to the store (in the database).
+    // The req.session will still be created in the node memory RAM however, and a set-cookie sent to the browser.
+    saveUninitialized: false,
+    resave: false,
+    secret: "cats",
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }, // Last for 24 hours before re login
+  })
+);
+
+// EXECUTE PASSPORT CONFIG
+require("./config/passport");
+
+// For every requests after the login, calls deserializeUser() which retrieves user informations from req.session, gives the results
+// And passport populates req.user with the result.
+// So, it allows us to retrieve the user based on the cookie sent by browser (via req.session which is reconstructed each request by express-session).
+app.use(passport.session());
+
+app.use((req, res, next) => {
+  // req.user is now avaible in req.locals.currentUser which exempts us to send users information to our views.
+  res.locals.currentUser = req.user;
+  next();
+});
 
 // ROUTES
 app
@@ -34,16 +72,30 @@ app
     try {
       const { firstname, lastname, email, password } = matchedData(req);
       const hashedpassword = await bcrypt.hash(password, 10);
-      await pool.query(
-        "INSERT INTO users(firstname, lastname, email, password) VALUES($1, $2, $3, $4)",
+
+      const { rows } = await pool.query(
+        "INSERT INTO users(firstname, lastname, email, password) VALUES($1, $2, $3, $4) RETURNING *",
         [firstname, lastname, email, hashedpassword]
       );
-      res.redirect("/secret-access");
+      const user = rows[0];
+
+      req.login(user, (err) => {
+        // req.login() and passport.authentificate() populate also req.user like passport.session()
+        // It also populates req.session like passport.authentificate() (which call req.login() in intern)
+        if (err) {
+          return next(err);
+        }
+        res.redirect("/secretaccess");
+      });
     } catch (err) {
       next(err);
     }
     return;
   });
+
+app.route("/secretaccess").get(isAuth, (req, res) => {
+  res.render("secretaccess");
+});
 
 // PORT
 const PORT = process.env.PORT || 3000;

@@ -22,8 +22,9 @@ const formValidations = [
     // matches() natively checks if the specific character is present at least one time, so we don't need to specify '+' regex modifier
     .matches(/[^A-Za-z0-9]/)
     .withMessage("The password must be at least 8 characters long"),
+
   body("confirm_password").custom(async (password, { req }) => {
-    if (req.confirm_password !== password) {
+    if (req.body.confirm_password !== password) {
       throw new Error("Passwords don't correspond!");
     }
     return true;
