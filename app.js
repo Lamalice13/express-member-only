@@ -34,7 +34,7 @@ app.use(
     // The req.session will still be created in the node memory RAM however, and a set-cookie sent to the browser.
     saveUninitialized: false,
     resave: false,
-    secret: process.env.SECRET,
+    secret: process.env.SESSION_SECRET,
     cookie: { maxAge: 1000 * 60 * 60 * 24 }, // Last for 24 hours before re login
   })
 );
