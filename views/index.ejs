@@ -9,7 +9,27 @@
     <h1>Welcome to our club house !</h1>
     <% if (locals.user && locals.user.status === true) {%>
     <h2>You're connected, <%= user.firstname %> !</h2>
-    <% } else if(locals.user && locals.user.status !== true) { %>
+    <a href="/form-message">Write a message</a>
+    <% if(locals.posts && locals.posts[0]){ %> <% posts.forEach(p => { %>
+    <div
+      style="
+        border: 1px black solid;
+        width: fit-content;
+        margin-bottom: 15px;
+        margin-top: 25px;
+        padding: 10px;
+      "
+    >
+      <p>
+        <%= `${p.date.getDate()}/0${p.date.getMonth() +
+        1}/20${p.date.getDate()}\, ${p.date.getHours()}h${p.date.getMinutes()}`
+        %>
+      </p>
+      <p><%= p.firstname %></p>
+      <p><%= p.text %></p>
+    </div>
+    <% }) %> <% } %> <% } else if(locals.user && locals.user.status !== true) {
+    %>
     <a href="/secretaccess">Go enter the secret access</a>
     <%} else { %>
     <a href="/signup">Sign up</a>

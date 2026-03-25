@@ -58,16 +58,26 @@ app.use((req, res, next) => {
 // ROUTE HOME PAGE
 app.route("/").get(async (req, res) => {
   let user;
+  let posts;
   if (req.isAuthenticated()) {
-    const { rows } = await pool.query("SELECT * FROM users WHERE id=$1", [
+    const postsDb = await pool.query(
+      "SELECT firstname, date, text FROM posts INNER JOIN users ON users.id = posts.user_id"
+    );
+    posts = postsDb.rows;
+    console.log(posts);
+    const userDb = await pool.query("SELECT * FROM users WHERE id=$1", [
       req.user.id,
     ]);
-    user = rows[0];
+    user = userDb.rows[0];
   }
   res.render("index", {
     user,
+    posts,
   });
 });
+
+// Afficher author and date msg on /
+// Afficher un bouton qui redirige vers page form-message
 
 // ROUTE SIGN UP
 app
