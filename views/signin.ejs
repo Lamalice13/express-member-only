@@ -7,6 +7,9 @@
   </head>
   <body>
     <h1>Please, sign in</h1>
+    <% if (locals.errors) { %> <% Object.values(errors).forEach(err => { %>
+    <p><%= err %></p>
+    <% }) %> <% } %>
     <form action="/signin" method="post">
       <label for="email">Enter your email</label>
       <input type="email" name="email" id="email" />
