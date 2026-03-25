@@ -7,7 +7,7 @@
   </head>
   <body>
     <h1>Welcome to our club house !</h1>
-    <% if (locals.user && locals.user.status === true) {%>
+    <% if (locals.user) {%>
     <h2>You're connected, <%= user.firstname %> !</h2>
     <a href="/form-message">Write a message</a>
     <% if(locals.posts && locals.posts[0]){ %>
@@ -27,12 +27,17 @@
           padding: 10px;
         "
       >
+        <% if(locals.user.status === true || locals.user.admin === true) {%>
         <p>
           <%= `${p.date.getDate()}/0${p.date.getMonth() +
           1}/${p.date.getFullYear()}\,
           ${p.date.getHours()}h${p.date.getMinutes()}` %>
         </p>
+
         <p><%= p.firstname %></p>
+        <% } else { %>
+        <p>Unknown user</p>
+        <% } %>
         <p><%= p.text %></p>
         <% if(locals.user.admin === true) { %>
         <form action="/posts/<%= p.id %>/delete" method="post">
