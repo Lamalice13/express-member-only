@@ -53,9 +53,10 @@
     <%} else { %>
     <a href="/signup">Sign up</a>
     <a href="/signin">Log in</a>
-    <% } %>
+    <% } %> <% if(locals.user) { %>
     <form action="/logout" method="post">
       <button type="submit">Log out</button>
     </form>
+    <% } %>
   </body>
 </html>
