@@ -127,11 +127,20 @@ app
       const match = await bcrypt.compare(code, codeDb);
       if (!match) throw new Error("Password doesn't correspond!");
     }),
-    (req, res) => {
+    async (req, res, next) => {
       const error = validationResult(req);
       if (!error.isEmpty())
         return res.render("secretaccess", { error: error.array() });
-      res.redirect("/members");
+
+      try {
+        await pool.query("UPDATE users SET status = TRUE WHERE id=$1", [
+          req.user.id,
+        ]);
+
+        res.redirect("/");
+      } catch (err) {
+        next(err);
+      }
     }
   );
 
