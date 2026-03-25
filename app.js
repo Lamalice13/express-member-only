@@ -159,7 +159,7 @@ app
     return;
   });
 
-// ROUTE SECRET ACCESSs
+// ROUTE SECRET ACCESSS
 app
   .route("/secretaccess")
   .get(isAuth, (req, res) => {
@@ -167,10 +167,8 @@ app
   })
   .post(
     body("code").custom(async (code) => {
-      const { rows } = await pool.query("SELECT code FROM secret_access");
-      const codeDb = rows[0].code;
-      const match = await bcrypt.compare(code, codeDb);
-      if (!match) throw new Error("Password doesn't correspond!");
+      const match = process.env.SECRET_CODE === code;
+      if (!match) throw new Error("Passwords don't correspond!");
     }),
     async (req, res, next) => {
       const error = validationResult(req);
@@ -206,6 +204,7 @@ app
         errors.array().forEach((err) => {
           formattedError[err.path] = err.msg;
         });
+        console.log(formattedError);
         return res.render("signin", {
           errors: formattedError,
         });
