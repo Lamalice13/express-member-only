@@ -90,10 +90,9 @@ app.route("/").get(async (req, res) => {
   let posts;
   if (req.isAuthenticated()) {
     const postsDb = await pool.query(
-      "SELECT firstname, date, text FROM posts INNER JOIN users ON users.id = posts.user_id"
+      "SELECT firstname, date, text, posts.id FROM posts INNER JOIN users ON users.id = posts.user_id"
     );
     posts = postsDb.rows;
-    console.log(posts);
     const userDb = await pool.query("SELECT * FROM users WHERE id=$1", [
       req.user.id,
     ]);
@@ -103,6 +102,16 @@ app.route("/").get(async (req, res) => {
     user,
     posts,
   });
+});
+
+// ROUTE DELETE POST
+app.post("/posts/:post_id/delete", async (req, res, next) => {
+  try {
+    await pool.query("DELETE FROM posts WHERE id = $1", [req.params.post_id]);
+    return res.redirect("/");
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ROUTE SIGN UP
@@ -151,6 +160,7 @@ app
     return;
   });
 
+// ROUTE SECRET ACCESSs
 app
   .route("/secretaccess")
   .get(isAuth, (req, res) => {
