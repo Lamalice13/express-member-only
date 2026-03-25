@@ -11,7 +11,7 @@ const flash = require("connect-flash");
 const isAuth = require("./middlewares/auth");
 const bcrypt = require("bcryptjs");
 // const hashCode = require("./utils/hashCode");
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, matchedData } = require("express-validator");
 
 // CONFIG
 app.use(express.urlencoded({ extended: true }));
@@ -55,6 +55,35 @@ app.use((req, res, next) => {
 
 // ROUTES
 
+// ROUTE FORM-MESSAGE
+app
+  .route("/form-message")
+  .get((req, res) => {
+    res.render("form-message");
+  })
+  .post(
+    body("text", "Your message has to be between 20 and 100 length")
+      .trim()
+      .isLength({ min: 20, max: 100 }),
+    async (req, res, next) => {
+      const error = validationResult(req);
+
+      if (!error.isEmpty())
+        return res.render("form-message", { error: error.array() });
+
+      try {
+        const { text } = matchedData(req);
+        await pool.query("INSERT INTO posts(user_id, text) VALUES($1, $2)", [
+          req.user.id,
+          text,
+        ]);
+        return res.redirect("/");
+      } catch (err) {
+        next(err);
+      }
+    }
+  );
+
 // ROUTE HOME PAGE
 app.route("/").get(async (req, res) => {
   let user;
@@ -75,9 +104,6 @@ app.route("/").get(async (req, res) => {
     posts,
   });
 });
-
-// Afficher author and date msg on /
-// Afficher un bouton qui redirige vers page form-message
 
 // ROUTE SIGN UP
 app

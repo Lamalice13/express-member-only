@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Write a message</title>
+  </head>
+  <body>
+    <h1>Create a new message</h1>
+    <form action="/form-message" method="post">
+      <label for="message"></label>
+      <% if (locals.error) { %>
+      <p style="color: red"><%= error[0].msg%></p>
+      <% } %>
+      <textarea
+        style="resize: none"
+        name="text"
+        id="message"
+        rows="10"
+        cols="50"
+        autofocus
+        placeholder="My message..."
+        required
+      ></textarea>
+      <button style="display: block">Submit</button>
+    </form>
+    <a href="/">Go back</a>
+  </body>
+</html>
