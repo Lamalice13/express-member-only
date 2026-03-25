@@ -34,11 +34,12 @@
         </p>
         <p><%= p.firstname %></p>
         <p><%= p.text %></p>
+        <% if(locals.user.admin === true) { %>
         <form action="/posts/<%= p.id %>/delete" method="post">
           <button type="submit">Delete</button>
         </form>
+        <% } %>
       </div>
-
       <% }) %>
     </div>
 
