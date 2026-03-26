@@ -10,6 +10,14 @@ const passport = require("passport");
 const flash = require("connect-flash");
 const isAuth = require("./middlewares/auth");
 const bcrypt = require("bcryptjs");
+const {
+  selectPostsUsers,
+  getUserById,
+  deletePostById,
+  setUserStatusTrue,
+  InsertUserAndReturn,
+  getUserStatus,
+} = require("./db/queries");
 // const hashCode = require("./utils/hashCode");
 const { body, validationResult, matchedData } = require("express-validator");
 
@@ -88,14 +96,8 @@ app.route("/").get(async (req, res) => {
   let user;
   let posts;
   if (req.isAuthenticated()) {
-    const postsDb = await pool.query(
-      "SELECT firstname, date, text, posts.id FROM posts INNER JOIN users ON users.id = posts.user_id"
-    );
-    posts = postsDb.rows;
-    const userDb = await pool.query("SELECT * FROM users WHERE id=$1", [
-      req.user.id,
-    ]);
-    user = userDb.rows[0];
+    posts = await selectPostsUsers();
+    user = await getUserById(req.user.id);
   }
   res.render("index", {
     user,
@@ -106,7 +108,7 @@ app.route("/").get(async (req, res) => {
 // ROUTE DELETE POST
 app.post("/posts/:post_id/delete", async (req, res, next) => {
   try {
-    await pool.query("DELETE FROM posts WHERE id = $1", [req.params.post_id]);
+    await deletePostById(req.params.post_id);
     return res.redirect("/");
   } catch (err) {
     next(err);
@@ -139,11 +141,12 @@ app
       const { firstname, lastname, email, password } = matchedData(req);
       const hashedpassword = await bcrypt.hash(password, 10);
 
-      const { rows } = await pool.query(
-        "INSERT INTO users(firstname, lastname, email, password) VALUES($1, $2, $3, $4) RETURNING *",
-        [firstname, lastname, email, hashedpassword]
+      const user = await InsertUserAndReturn(
+        firstname,
+        lastname,
+        email,
+        hashedpassword
       );
-      const user = rows[0];
 
       req.login(user, (err) => {
         // req.login() and passport.authentificate() populate also req.user like passport.session()
@@ -162,8 +165,17 @@ app
 // ROUTE SECRET ACCESSS
 app
   .route("/secretaccess")
-  .get(isAuth, (req, res) => {
-    res.render("secretaccess");
+  .get(isAuth, async (req, res, next) => {
+    try {
+      const status = await getUserStatus(req.user.id);
+
+      if (status === true) {
+        return res.redirect("/");
+      }
+      return res.render("secretaccess");
+    } catch (err) {
+      next(err);
+    }
   })
   .post(
     body("code").custom(async (code) => {
@@ -176,10 +188,7 @@ app
         return res.render("secretaccess", { error: error.array() });
 
       try {
-        await pool.query("UPDATE users SET status = TRUE WHERE id=$1", [
-          req.user.id,
-        ]);
-
+        await setUserStatusTrue(req.user.id);
         res.redirect("/");
       } catch (err) {
         next(err);

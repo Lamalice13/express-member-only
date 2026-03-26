@@ -2,6 +2,7 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const pool = require("../db/pool");
 const bcrypt = require("bcryptjs");
+const { getUserByEmail, getUserById } = require("../db/queries");
 
 const customFields = {
   usernameField: "email", // passport will retrieve req.body.email instead of req.body.username
@@ -9,10 +10,7 @@ const customFields = {
 
 const verifyCallback = async (email, password, done) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM users WHERE email=$1", [
-      email,
-    ]);
-    const user = rows[0];
+    const user = await getUserByEmail(email);
 
     if (!user) {
       return done(null, false, { message: "Incorrect e-mail!" });
@@ -43,8 +41,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM users WHERE id=$1", [id]);
-    const user = rows[0];
+    const user = await getUserById(id);
     done(null, user);
   } catch (err) {
     done(err);
